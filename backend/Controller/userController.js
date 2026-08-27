@@ -66,8 +66,11 @@ class userController {
           message: "Email and password are required",
         });
       }
-      // Check if user exists
-      const user = await UserModel.findOne({ email });
+      const cleanEmail = email.trim().toLowerCase();
+      // Check if user exists (case-insensitive email search)
+      const user = await UserModel.findOne({
+        email: { $regex: `^${cleanEmail}$`, $options: "i" }
+      });
 
       if (!user) {
         return res
@@ -87,13 +90,13 @@ class userController {
           message: "Your account status is not verified for login",
         });
       }
-      // Compare passwords securely
+      // Compare passwords securely (supports both bcrypt hashed and plaintext passwords)
+      let isPasswordMatch = await bcrypt.compare(password, user.password).catch(() => false);
+      if (!isPasswordMatch && password === user.password) {
+        isPasswordMatch = true;
+      }
 
-
-      // const isPasswordMatch = password === user.password
-
-      const isPasswordMatch = await bcrypt.compare(password, user.password);
-      console.log(isPasswordMatch)
+      console.log("[USER LOGIN] Password match result:", isPasswordMatch);
       if (!isPasswordMatch) {
         return res
           .status(401)

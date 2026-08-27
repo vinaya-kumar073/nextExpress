@@ -62,8 +62,8 @@ export default function Login() {
       console.log("[LOGIN FRONTEND] Response status:", response.status);
 
       const contentType = response.headers.get("content-type");
-    //   const isJson = contentType && contentType.includes("application/json");
-      const data = await response.json();
+      const isJson = contentType && contentType.includes("application/json");
+      const data = isJson ? await response.json() : null;
 
       console.log("[LOGIN FRONTEND] Response data:", data);
 
@@ -115,12 +115,14 @@ export default function Login() {
 
       console.log("[LOGOUT FRONTEND] Response status:", response.status);
 
-      const data = await response.json();
+      const contentType = response.headers.get("content-type");
+      const isJson = contentType && contentType.includes("application/json");
+      const data = isJson ? await response.json() : null;
 
       console.log("[LOGOUT FRONTEND] Response data:", data);
 
       if (!response.ok) {
-        throw new Error(data.message || "Logout failed");
+        throw new Error(data?.message || "Logout failed");
       }
 
       console.log("[LOGOUT FRONTEND] Logout successful");
